@@ -34,3 +34,6 @@ async def transect(request, transect_id):
             data = await response.json()
 
     return render(request, 'transect/transect.html', context={'data': data})
+
+def test(request):
+    return render(request, 'transect/test.html', context={"gaming": "six"})
