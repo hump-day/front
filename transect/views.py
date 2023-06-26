@@ -25,7 +25,7 @@ def upload(request):
 
 
 def api(request):
-    pass
+    return render(request, 'transect/api.html')
 
 
 async def transect(request, transect_id):
@@ -37,3 +37,7 @@ async def transect(request, transect_id):
 
 def test(request):
     return render(request, 'transect/test.html', context={"gaming": "six"})
+
+
+def browse(request):
+    return render(request, 'transect/browse.html')
