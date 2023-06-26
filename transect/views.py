@@ -6,6 +6,16 @@ from django.views.generic import TemplateView
 from django.http import HttpResponse
 import aiohttp
 
+api_link = 'https://thegreatleapforward.pythonanywhere.com/'
+
+
+async def get(uri):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(api_link + uri) as response:
+            data = await response.json()
+
+    return data
+
 
 def index(request):
     now = datetime.now()
@@ -13,10 +23,7 @@ def index(request):
 
 
 async def observation(request, obvs_id):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'https://thegreatleapforward.pythonanywhere.com/observations/{obvs_id}/?format=json') as response:
-            data = await response.json()
-
+    data = await get(f'observations/{obvs_id}/')
     return render(request, 'transect/observation.html', context={**data})
 
 
@@ -29,15 +36,16 @@ def api(request):
 
 
 async def transect(request, transect_id):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'https://thegreatleapforward.pythonanywhere.com/transects/{transect_id}') as response:
-            data = await response.json()
+    data = await get(f'transects/{transect_id}')
 
     return render(request, 'transect/transect.html', context={'data': data})
+
 
 def test(request):
     return render(request, 'transect/test.html', context={"gaming": "six"})
 
 
-def browse(request):
-    return render(request, 'transect/browse.html')
+async def observations(request):
+    data = await get('observations')
+
+    return render(request, 'transect/observations.html', context={'data': data})
