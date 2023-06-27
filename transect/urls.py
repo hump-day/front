@@ -1,7 +1,7 @@
 # transect/urls.py
 from django.urls import path
 
-from transect.views import index, observation, transect, test, api, observations, upload
+from transect.views import index, observation, transect, test, api, observations, upload, upload_popup
 
 
 urlpatterns = [
@@ -11,5 +11,6 @@ urlpatterns = [
     path("test/", test),
     path("api/", api),
     path("upload", upload),
-    path("observations", observations)
+    path("observations", observations),
+    path("__upload_observations_/<str:lat>/<str:lng>/", upload_popup)
 ]

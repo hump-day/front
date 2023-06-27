@@ -2,9 +2,11 @@
 import json
 from datetime import datetime
 from django.shortcuts import render
-from django.views.generic import TemplateView
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 import aiohttp
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_POST
+from django.views.generic import CreateView
 
 api_link = 'https://thegreatleapforward.pythonanywhere.com/'
 
@@ -28,11 +30,12 @@ async def observation(request, obvs_id):
 
 
 def upload(request):
-    return render(request, 'transect/upload.html')
+    return render(request, 'transect/upload.html', context={'domain': request.get_host()})
 
 
+@require_POST
 def api(request):
-    return render(request, 'transect/api.html')
+    return HttpResponse(status=200)
 
 
 async def transect(request, transect_id):
@@ -42,6 +45,7 @@ async def transect(request, transect_id):
 
 
 def test(request):
+    request
     return render(request, 'transect/test.html', context={"gaming": "six"})
 
 
@@ -49,3 +53,13 @@ async def observations(request):
     data = await get('observations')
 
     return render(request, 'transect/observations.html', context={'data': data})
+
+
+def upload_popup(request, lat, lng):
+    try:
+        lat = float(lat)
+        lng = float(lng)
+    except ValueError:
+        raise Http404("Value Error")
+
+    return render(request, 'transect/upload_popup.html', context={'latitude': lat, 'longitude': lng})

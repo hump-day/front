@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        const form = document.querySelector('form')
+        form.addEventListener('submit', handleSubmit)
+
+        function handleSubmit(event) {
+            const form = event.currentTarget
+            const formData = new FormData(form)
+            window.opener.postMessage(formData)
+            console.log("done!")
+
+            /*const url = new URL(form.action)
+            const opt = {method: form.method, body: formData}
+                            console.log('done!')
+            a.innerHTML = "all done! you can close this window now. It should close on its own, but it often doesn't."
+            fetch(url, opt)*/
+        }
+        function cleanup() {
+            /*const form = event.currentTarget
+            const formData = new FormData(form)
+            window.opener.postMessage(formData)
+
+            window.close()*/
+            console.log("done from cleanup!")
+        }
+    </script>
+</head>
+<body>
+Create new observation at {{ latitude }}, {{ longitude }}
+
+<form action="/api/" method="post" enctype="multipart/form-data" onsubmit="cleanup()">{% csrf_token %}
+  <label for="file">File</label>
+  <input id="file" name="file" type="file" />
+  <button>Upload</button>
+</form>
+</body>
+</html>
