@@ -15,7 +15,7 @@
        * SPDX-License-Identifier: Apache-2.0
        */
       let map;
-      const hamber = { lat: 49.24033337903915, lng: -123.12585731729783 };
+      let hamber = { lat: 49.24033337903915, lng: -123.12585731729783 };
 
       function createCenterControl(map) {
         const controlButton = document.createElement("button");
@@ -31,107 +31,193 @@
         });
         return controlButton;
       }
-      let marker;
+      let markers = []
       let geocoder;
       let responseDiv;
       let response;
+      let distance = 0
+      let directionsService
+      let renderers = []
 
       function initMap() {
 
-        map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 4,
-          center: { lat: 49.496675, lng: -102.65625 },
-            mapTypeControl: false
-        });
 
-        var georssLayer = new google.maps.KmlLayer({
-          url: "http://api.flickr.com/services/feeds/geo/?g=322338@N20&lang=en-us&format=feed-georss",
-        });
-        georssLayer.setMap(map);
-
-        // Create the DIV to hold the control.
-        const centerControlDiv = document.createElement("div");
-        // Create the control.
-        const centerControl = createCenterControl(map);
-
-        // Append the control to the DIV.
-        centerControlDiv.appendChild(centerControl);
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(
-          centerControlDiv
-        );
-
-        geocoder = new google.maps.Geocoder();
-
-        const inputText = document.createElement("input");
-
-        inputText.type = "text";
-        inputText.placeholder = "Enter a location";
-
-        const submitButton = document.createElement("input");
-
-        submitButton.type = "button";
-        submitButton.value = "Geocode";
-        submitButton.classList.add("button", "button-primary");
-
-        const clearButton = document.createElement("input");
-
-        clearButton.type = "button";
-        clearButton.value = "Clear";
-        clearButton.classList.add("button", "button-secondary");
-        response = document.createElement("pre");
-        response.id = "response";
-        response.innerText = "";
-        responseDiv = document.createElement("div");
-        responseDiv.id = "response-container";
-        responseDiv.appendChild(response);
-
-        const instructionsElement = document.createElement("p");
-
-        instructionsElement.id = "instructions";
-        instructionsElement.innerHTML =
-          "<strong>Instructions</strong>: Enter an address in the textbox to geocode or click on the map to reverse geocode.";
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputText);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(submitButton);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(clearButton);
-        map.controls[google.maps.ControlPosition.LEFT_TOP].push(
-          instructionsElement
-        );
-        map.controls[google.maps.ControlPosition.LEFT_TOP].push(responseDiv);
-        marker = new google.maps.Marker({
-          map,
-        });
-        map.addListener("click", (e) => {
-          geocode({ location: e.latLng });
-        });
-        submitButton.addEventListener("click", () =>
-          geocode({ address: inputText.value })
-        );
-        clearButton.addEventListener("click", () => {
-          clear();
-        });
-        clear();
-      }
-
-      function clear() {
-        marker.setMap(null);
-      }
-
-      function geocode(request) {
-        clear();
-        geocoder
-          .geocode(request)
-          .then((result) => {
-            const { results } = result;
-
-            map.setCenter(results[0].geometry.location);
-            marker.setPosition(results[0].geometry.location);
-            marker.setMap(map);
-            response.innerText = JSON.stringify(result, null, 2);
-            return results;
-          })
-          .catch((e) => {
-            alert("Geocode was not successful for the following reason: " + e);
+          map = new google.maps.Map(document.getElementById("map"), {
+              zoom: 8,
+              center: hamber,
+              mapTypeControl: false
           });
+          directionsService = new google.maps.DirectionsService()
+
+          var georssLayer = new google.maps.KmlLayer({
+              url: "http://api.flickr.com/services/feeds/geo/?g=322338@N20&lang=en-us&format=feed-georss",
+          });
+          georssLayer.setMap(map);
+
+          // Create the DIV to hold the control.
+          const centerControlDiv = document.createElement("div");
+          // Create the control.
+          const centerControl = createCenterControl(map);
+
+          // Append the control to the DIV.
+          centerControlDiv.appendChild(centerControl);
+          map.controls[google.maps.ControlPosition.TOP_CENTER].push(
+              centerControlDiv
+          );
+
+          geocoder = new google.maps.Geocoder();
+
+          const inputText = document.createElement("input");
+
+          inputText.type = "text";
+          inputText.placeholder = "Enter a location";
+
+          const submitButton = document.createElement("input");
+
+          submitButton.type = "button";
+          submitButton.value = "Geocode";
+          submitButton.classList.add("button", "button-primary");
+
+          const clearButton = document.createElement("input");
+
+          clearButton.type = "button";
+          clearButton.value = "Clear";
+          clearButton.classList.add("button", "button-secondary");
+          response = document.createElement("pre");
+          response.id = "response";
+          response.innerText = "";
+          responseDiv = document.createElement("div");
+          responseDiv.id = "response-container";
+          responseDiv.appendChild(response);
+
+          const instructionsElement = document.createElement("p");
+          const distanceElement = document.createElement("p")
+
+          instructionsElement.id = "instructions";
+          instructionsElement.innerHTML =
+              "<strong>Instructions</strong>: Enter an address in the textbox to geocode or click on the map to reverse geocode.";
+
+          distanceElement.id = "distance"
+          distanceElement.innerHTML = "<strong>Distance Walked</strong>: 0 Meters"
+
+          map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputText);
+          map.controls[google.maps.ControlPosition.TOP_LEFT].push(submitButton);
+          map.controls[google.maps.ControlPosition.TOP_LEFT].push(clearButton);
+          map.controls[google.maps.ControlPosition.LEFT_TOP].push(instructionsElement);
+          map.controls[google.maps.ControlPosition.LEFT_TOP].push(distanceElement);
+          map.controls[google.maps.ControlPosition.LEFT_TOP].push(responseDiv);
+
+          markers.push(new google.maps.Marker({
+              map,
+          }));
+          map.addListener("click", (e) => {
+              geocode({location: e.latLng});
+          });
+          submitButton.addEventListener("click", () =>
+              geocode({address: inputText.value})
+          );
+          clearButton.addEventListener("click", () => {
+              clear();
+          });
+          clear();
+/*
+          const bounds = new google.maps.LatLngBounds();
+          const service = new google.maps.DistanceMatrixService();
+*/
+          function get_between(orig, dest) {/*
+              const request = {
+                  origins: [orig],
+                  destinations: [dest],
+                  travelMode: google.maps.TravelMode.WALKING,
+                  unitSystem: google.maps.UnitSystem.METRIC,
+                  avoidHighways: false,
+                  avoidTolls: false,
+              }*/
+
+              /*service.getDistanceMatrix(request).then((result) => {
+                  const origin = result.originAddresses[0];
+                  const destination = result.destinationAddresses[0];
+
+                  const handler = ({results}) => {
+                      map.fitBounds(bounds.extend(results[0].geometry.location));
+                  }
+
+                  geocoder.geocode({address: origin}).then(handler)
+                  geocoder.geocode({address: destination}).then(handler)
+
+                  response.innerText = JSON.stringify(result, null, 2);
+                  distance += result.rows[0].elements[0].distance.value
+                  distanceElement.innerHTML = "<strong>Distance Walked</strong>: " + distance.toString() + " Meters"
+                  console.log(distance)
+              });*/
+
+              const request2 = {
+                  origin: orig,
+                  destination: dest,
+                  travelMode: google.maps.TravelMode.WALKING
+              }
+
+              directionsService.route(request2).then((result, status) => {
+                  let service = new google.maps.DirectionsRenderer()
+              service.setMap(map)
+              service.setOptions({suppressMarkers: true})
+              service.setDirections(result)
+                  renderers.push(service)
+
+                  response.innerText = JSON.stringify(result, null, 2)
+
+                  distance += result.routes[0].legs[0].distance.value
+                  distanceElement.innerHTML = "<strong>Distance Walked</strong>: " + distance.toString() + " Meters"
+                                    console.log(distance)
+
+
+
+})
+          }
+
+          // build request
+
+          function clear() {
+              markers.forEach(item => {
+                  item.setMap(null)
+              })
+              markers = []
+
+              renderers.forEach(item => {
+                  item.setMap(null)
+              })
+              renderers = []
+
+              distance = 0
+          }
+
+          function geocode(request) {
+              // clear();
+              geocoder
+                  .geocode(request)
+                  .then((result) => {
+                      const {results} = result;
+
+                      let marker = new google.maps.Marker({
+                          map,
+                          label: markers.length.toString(),
+                          position: results[0].geometry.location,
+                      })
+
+                      if (markers.length > 0) {
+                          get_between(markers[markers.length - 1].position, marker.position)
+                      }
+
+                      map.setCenter(results[0].geometry.location);
+                      hamber = results[0].geometry.location
+                      markers.push(marker)
+                      response.innerText = JSON.stringify(result, null, 2);
+                      return results;
+                  })
+                  .catch((e) => {
+                      alert("Geocode was not successful for the following reason: " + e);
+                  });
+          }
       }
 
       window.initMap = initMap;
@@ -223,6 +309,18 @@
       }
 
       #instructions {
+        background-color: #fff;
+        border: 0;
+        border-radius: 2px;
+        box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+        margin: 10px;
+        padding: 0 0.5em;
+        font: 400 18px Roboto, Arial, sans-serif;
+        overflow: hidden;
+        padding: 1rem;
+        font-size: medium;
+      }
+      #distance {
         background-color: #fff;
         border: 0;
         border-radius: 2px;
