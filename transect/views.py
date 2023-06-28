@@ -1,14 +1,12 @@
 # transect/views.py
-import json
 import os
 from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 import aiohttp
-from django.views.decorators.http import require_POST
-from django.views.generic import CreateView
 from .forms import ImageForm
 from .custom_storage import MediaStorage
+from json import loads, JSONDecodeError, dumps
 
 api_link = 'https://thegreatleapforward.pythonanywhere.com/'
 formats = (
@@ -38,8 +36,34 @@ def upload(request):
     return render(request, 'transect/upload.html', context={'domain': request.get_host()})
 
 
-@require_POST
-def api(request):
+async def api(request):
+    if request.method != "POST":
+        raise Http404
+    '''
+    try:
+        body = loads(request.body.decode())
+        nodes = body['markers']
+        obvs = body['observations']
+        date = body['date']
+    except JSONDecodeError | KeyError as e:
+        return HttpResponse(str(e), status=400)
+
+    print(f'{nodes=}, {obvs=}, {date=}')
+    body = {
+        "name": "Unnamed",
+        "user": 1,
+        "date": date,
+        "nodes": [{"latitude": node['lat'], "longitude": node['lng'], "index": i}
+                  for i, node in enumerate(nodes)],
+        "observations": [{"latitude": obv['lat'], "longitude": obv['lng'], "species": None, "date_offset": 0, "images": [{"url": obv['url']}]}
+                         for obv in obvs]
+    }
+'''
+    async with aiohttp.ClientSession(api_link) as session:
+        async with session.post('/transects', json=request.body.decode(), headers={'Content-Type': 'application/json'}) as response:
+            pass#data = await response.json()
+    #print(data)
+
     return HttpResponse(status=200)
 
 
@@ -67,16 +91,16 @@ def upload_popup(request, lat, lng):
             file_obj = form.files.get('img', None)
             if not file_obj.name.endswith(formats):  # Incorrect filetype
                 error = f'{file_obj.name} is invalid filetype'
+            else:
+                path = 'images/'
+                full = os.path.join(path, file_obj.name)
+                media = MediaStorage()
 
-            path = 'images/'
-            full = os.path.join(path, file_obj.name)
-            media = MediaStorage()
-
-            if media.exists(full):  # Image already exists
-                error = f'image {file_obj.name} already exists'
-
-            media.save(full, file_obj)
-            url = media.url(full).split('?')[0]  # remove api key
+                if media.exists(full):  # Image already exists
+                    error = f'image {file_obj.name} already exists'
+                else:
+                    media.save(full, file_obj)
+                url = media.url(full).split('?')[0]  # remove api key
         else:  # Form not valid
             error = f'no file'
 
