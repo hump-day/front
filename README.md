@@ -8,5 +8,7 @@ git clone https://github.com/hump-day/front/
 ```
 2. runserver from the directory you cloned into
   ```bash
-  python manage.py runserver
-  ```
+  python3 manage.py runserver ```
+or
+```bash
+./manage.py runserver```
