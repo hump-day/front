@@ -3,7 +3,7 @@
         <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
         <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     </head>
-    <body> {{ data }}
+    <body>
 
 
         <style>
@@ -129,7 +129,7 @@ L=["red","blue"]
 pyscript.write('n',f"{len(L)}")
 
 def clicked(n):
-    window.location.href = "https://github.com/hump-day/front"
+    window.location.href = f"http://127.0.0.1:8000/observations/{n+1}/"
 
 def grid():
     x=0
@@ -152,7 +152,6 @@ def search():
                 temp.append(m)
         L.clear()
         L=temp
-        print(L)
         grid()
 
         </py-script>

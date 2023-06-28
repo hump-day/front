@@ -3,9 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+
+    <style>
+        div[id="div"] {
+            height: 400px;
+            width: 100%;
+            background: url("https://inaturalist-open-data.s3.amazonaws.com/photos/2415216/large.jpg") no-repeat;
+            background-position-y: 35%;
+            -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+            position: relative;
+            text-align: center;
+            object-fit: cover;
+            border: 0
+        }
+        p[id="tscredi"] {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 15px 0;
+        }
+        div[id="title"] {
+            text-align: center;
+            font-size: x-large;
+        }
+
+        div[id="explore"] {
+            background-image: linear-gradient(greenyellow, forestgreen);
+            height: 50%;
+            width: 100%;
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        li {
+            display: inline;
+        }
+        li:first-child {
+            border-top: 3px;
+        }
+        li:last-child {
+            padding-bottom: 12%;
+            border: none;
+        }
+        li a {
+            display: block;
+            text-align: center;
+            padding: 6% 6%;
+            text-decoration: none;
+            border: lightgreen solid 1px;
+            font-family: "Fira Code Retina", Serif, serif;
+        }
+        li a:hover {
+            background-color: lightgreen;
+        }
+    </style>
 </head>
 <body>
-    <h1>oh my got</h1>
-    <p>The current time is {{ now }}.</p>
+    <div id="div">
+        <p id="tscredi">Image credits: greglasley</p>
+    </div>
+    <div id="title">
+        <h1>TransectNat</h1>
+    <p>The only site for naturalists with first-class support for transect data</p>
+    </div>
+    <div id="explore">
+        <li><a href="/observations">EXPLORE OBSERVATIONS</a></li>
+        <li><a href="/upload">UPLOAD TRANSECTS</a></li>
+        <li><a href="https://thegreatleapforward.pythonanywhere.com">VIEW API</a></li>
+        <li><a href="/">Coming Soon! (Maybe)</a></li>
+    </div>
 </body>
 </html>
