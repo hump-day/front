@@ -357,14 +357,16 @@ width=600,height=300,left=100,top=100`
                       name: "unnamed",
                       user: 1,
                       nodes: markers.map((item, index) => {
-                          return {
-                              latitude: item.position.lat,
-                              longitude: item.position.lng,
+                          const obj = {
+                              latitude: item.position.lat(),
+                              longitude: item.position.lng(),
                               index: index
                           }
+                          console.log(obj)
+                          return obj
                       }),
                       observations: observations.map(item => {
-                          return {
+                          const obj = {
                               latitude: item.lat,
                               longitude: item.lng,
                               species: null,
@@ -373,6 +375,8 @@ width=600,height=300,left=100,top=100`
                                   {url: item.url}
                               ]
                           }
+                          console.log(obj)
+                          return obj
                       }),
                       date: new Date(date).toISOString()
                   }),
@@ -385,6 +389,7 @@ width=600,height=300,left=100,top=100`
 
               let direct = "https://thegreatleapforward.pythonanywhere.com/transects/"
 
+              console.debug(opt)
               fetch(direct, opt).then(response => {
                   console.log(response.body)
               }).catch(reason => {
