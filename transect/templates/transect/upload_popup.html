@@ -4,6 +4,38 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script>
+        let testpath = "{{ preview }}"
+        let testerror = "{{ error }}"
+
+        window.onload = () => {
+            function onError(error) {
+                console.error(error)
+                const newdiv = document.createElement('div')
+                let p = document.createElement('p')
+                p.innerHTML = "Error: " + error
+                newdiv.appendChild(p)
+                const current = document.getElementById("formpost")
+                document.body.insertBefore(newdiv, current)
+            }
+
+            function onUpload(path) {
+                console.log("path uploaded!")
+                const newdiv = document.createElement('div')
+                let img = document.createElement('img')
+                img.src = path
+                img.id = 'among'
+                newdiv.appendChild(img)
+                const current = document.getElementById("formpost")
+                document.body.insertBefore(newdiv, current)
+            }
+            if (testerror !== "") {
+                onError(testerror)
+            } else if (testpath !== "") {
+                onUpload(testpath)
+            }
+        }
+
+        /*
         const form = document.querySelector('form')
         form.addEventListener('submit', handleSubmit)
 
@@ -13,29 +45,49 @@
             window.opener.postMessage(formData)
             console.log("done!")
 
-            /*const url = new URL(form.action)
+            const url = new URL(form.action)
             const opt = {method: form.method, body: formData}
                             console.log('done!')
             a.innerHTML = "all done! you can close this window now. It should close on its own, but it often doesn't."
-            fetch(url, opt)*/
+            fetch(url, opt)
         }
+         */
         function cleanup() {
             /*const form = event.currentTarget
             const formData = new FormData(form)
             window.opener.postMessage(formData)
-
-            window.close()*/
+*/
+            //window.close()
             console.log("done from cleanup!")
         }
+
+        function save() {
+            const observation = {
+                error: testerror,
+                url: testpath,
+                lat: {{ latitude }},
+                lng: {{ longitude }}
+            }
+
+            window.opener.postMessage(observation)
+            window.close()
+        }
     </script>
+    <style>
+
+    </style>
+
 </head>
 <body>
-Create new observation at {{ latitude }}, {{ longitude }}
+<h1>Create new observation at {{ latitude }}, {{ longitude }}</h1>
 
-<form action="/api/" method="post" enctype="multipart/form-data" onsubmit="cleanup()">{% csrf_token %}
-  <label for="file">File</label>
-  <input id="file" name="file" type="file" />
-  <button>Upload</button>
-</form>
+<div id="formpost">
+<form method="post" enctype="multipart/form-data" onsubmit="cleanup()">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Upload</button>
+</div>
+  <button onclick="save()">Confirm and Close</button>
+
 </body>
 </html>

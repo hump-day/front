@@ -42,7 +42,6 @@
       let uploadMode = false
       const supports_clear_redo = false
       let observations = []
-      let opened
 
       function initMap() {
           map = new google.maps.Map(document.getElementById("map"), {
@@ -247,7 +246,7 @@
               if (uploadMode) {
                   let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
 width=600,height=300,left=100,top=100`
-                  opened = '/__upload_observations_/' + request.location.lat() + '/' + request.location.lng()
+                  let opened = '/__upload_observations_/' + request.location.lat() + '/' + request.location.lng()
 
                   window.open(opened, 'test', params)
                   uploadMode = false
@@ -323,10 +322,15 @@ width=600,height=300,left=100,top=100`
 
           window.addEventListener("message", function(event) {
               console.debug(event)
-              if (event.origin !== "{{ domain }}" + opened) {
+              if (!event.isTrusted) {
                   return
               }
               console.debug("passed!")
+              const url = event.data.url
+              if (url !== undefined && url !== ""){
+                  console.log('new observation!')
+                  observations.push(event.data)
+              }
 
           }, true)
 
