@@ -5,6 +5,7 @@ I am about 90% sure that a bug in Boto3 causes the image uploading to fail some 
 ## Running Locally
 
 Instructions to run locally:
+Note: this assumes you are running linux. I have no idea how windows works
 1. clone the repo
 ```bash
 git clone https://github.com/hump-day/front/
@@ -13,7 +14,13 @@ git clone https://github.com/hump-day/front/
 ```bash
 cd front
 ```
-3. runserver
+3. install the requirements
+  ```bash
+python3 -m venv env
+source env/bin/activate
+python3 -m pip install -r requirements.txt
+```
+4. runserver
   ```bash
   python3 manage.py runserver
 ```
